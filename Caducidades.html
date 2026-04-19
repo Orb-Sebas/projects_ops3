@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Caducidades · Abril 2026 · Cohorts Optimization</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<!-- ApexCharts -->
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.45.2/dist/apexcharts.min.js"></script>
+<!-- GSAP -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<!-- three.js for starfield -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+
+<link rel="stylesheet" href="styles.css?v=7">
+</head>
+<body>
+
+<div class="backdrop"></div>
+<canvas id="starfield"></canvas>
+<div id="milkyway"></div>
+
+<header class="masthead">
+  <div class="masthead-top">
+    <span class="brand">
+      <img src="assets/orbidi-logo.png" alt="ORBIDI" class="brand-logo">
+      <span class="brand-divider"></span>
+      <span class="dot"></span>Cohorts Optimization · Operaciones
+    </span>
+    <span class="date">Corte: viernes 17 abril 2026</span>
+  </div>
+  <h1>Anatomía de la <span class="amp">caducidad</span></h1>
+  <div class="sub">
+    <span>389 proyectos</span>
+    <span>241 MKT · 148 PC</span>
+    <span>Análisis uno a uno · caídas acumuladas del mes</span>
+    <span id="filterLine">▸ ningún filtro activo</span>
+  </div>
+</header>
+
+<section class="filtros" id="filtros">
+  <div class="filter-group">
+    <span class="filter-group-label">Familia</span>
+    <button class="chip active" data-filter="familia" data-value="">Todas</button>
+    <button class="chip" data-filter="familia" data-value="MKT">MKT</button>
+    <button class="chip" data-filter="familia" data-value="PC">PC</button>
+  </div>
+  <div class="filter-group" id="productoFilter">
+    <span class="filter-group-label">Producto</span>
+    <button class="chip active" data-filter="producto" data-value="">Todos</button>
+    <button class="chip" data-filter="producto" data-value="WEB">WEB</button>
+    <button class="chip" data-filter="producto" data-value="SEO">SEO</button>
+    <button class="chip" data-filter="producto" data-value="RRSS">RRSS</button>
+    <button class="chip" data-filter="producto" data-value="ECOM">ECOM</button>
+    <button class="chip" data-filter="producto" data-value="FACT">FACT</button>
+    <button class="chip" data-filter="producto" data-value="ANALITICA">ANLT</button>
+    <button class="chip" data-filter="producto" data-value="PC">PC</button>
+  </div>
+  <div class="filter-group">
+    <span class="filter-group-label">Memoria</span>
+    <button class="chip active" data-filter="memoria" data-value="">Todas</button>
+    <button class="chip" data-filter="memoria" data-value="1">Mem 1</button>
+    <button class="chip" data-filter="memoria" data-value="2">Mem 2</button>
+  </div>
+  <div class="filter-group">
+    <span class="filter-group-label">Causa</span>
+    <button class="chip active" data-filter="causa" data-value="">Todas</button>
+    <button class="chip" data-filter="causa" data-value="Perdido - Ghosting">Ghosting</button>
+    <button class="chip" data-filter="causa" data-value="Perdido - Baja">Baja</button>
+    <button class="chip" data-filter="causa" data-value="Perdido - Desistido">Desistido</button>
+  </div>
+  <button class="filter-reset" onclick="resetFilters()">Reiniciar</button>
+</section>
+</div>
+
+<main>
+
+<!-- I — KPIs -->
+<section id="overview">
+  <div class="section-header">
+    <span class="section-num">I</span>
+    <h2>Estado del mes</h2>
+    <span class="section-desc">Indicadores clave · abril 2026</span>
+  </div>
+  <div class="kpi-grid" id="kpiGrid"></div>
+</section>
+
+<!-- II — Headline insight -->
+<section id="headline-insight">
+  <div class="section-header">
+    <span class="section-num">II</span>
+    <h2>La lectura de fondo</h2>
+    <span class="section-desc">Lo que los números dicen</span>
+  </div>
+  <div class="insights-column" id="headlineInsights"></div>
+</section>
+
+<!-- III — Distribución de causas -->
+<section id="causas">
+  <div class="section-header">
+    <span class="section-num">III</span>
+    <h2>Las tres causas, en detalle</h2>
+    <span class="section-desc">Distribución y comportamiento por memoria</span>
+  </div>
+  <div class="chart-grid">
+    <div class="chart-card">
+      <div class="chart-card-title">Causa por familia</div>
+      <div class="chart-card-sub">Composición relativa · apilada 100%</div>
+      <div class="chart-wrap" id="chartCausasFamilia"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-title">Memoria 1 vs Memoria 2</div>
+      <div class="chart-card-sub">¿Dónde se cae cada causa?</div>
+      <div class="chart-wrap" id="chartCausasMemoria"></div>
+    </div>
+  </div>
+  <div class="insights-column" id="estructuraInsights"></div>
+</section>
+
+<!-- IV — Subcausas -->
+<section id="subcausas">
+  <div class="section-header">
+    <span class="section-num">IV</span>
+    <h2>El mapa de subcausas</h2>
+    <span class="section-desc">Por qué realmente caen los proyectos</span>
+  </div>
+  <div class="chart-grid three">
+    <div class="chart-card">
+      <div class="chart-card-title">Top subcausas del mes</div>
+      <div class="chart-card-sub">Ordenadas por frecuencia (filtro aplicado)</div>
+      <div class="chart-wrap tall" id="chartSubcausas"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-title">Por categoría</div>
+      <div class="chart-card-sub">Agrupación temática</div>
+      <div class="chart-wrap tall" id="chartCategoria"></div>
+    </div>
+  </div>
+  <div class="insights-column" id="subcausaInsights"></div>
+</section>
+
+<!-- V — MKT vs PC -->
+<section id="comparativa">
+  <div class="section-header">
+    <span class="section-num">V</span>
+    <h2>MKT <em>vs</em> PC — por qué no son la misma historia</h2>
+    <span class="section-desc">Dos familias, dos modos de fallar</span>
+  </div>
+  <div class="insights-column insights-grid-2" id="comparativaInsightsTop" style="margin-bottom: 1.2rem; margin-top: 0;"></div>
+
+  <div class="compare">
+    <div class="compare-col">
+      <h3>MKT · 241 proyectos</h3>
+      <div class="compare-row"><span class="label">Causa dominante Mem 1</span><span class="val">Baja / Desistido (79%)</span></div>
+      <div class="compare-row"><span class="label">Causa dominante Mem 2</span><span class="val">Ghosting (55%)</span></div>
+      <div class="compare-row"><span class="label">Pipeline típico caída</span><span class="val">SEGUIMIENTO · CANCELADO</span></div>
+      <div class="compare-row"><span class="label">Insatisfacción cliente</span><span class="val">27 casos (11%)</span></div>
+      <div class="compare-row"><span class="label">Bloqueo por pago</span><span class="val">1 caso (No pago IVA)</span></div>
+      <div class="compare-row"><span class="label">Bloqueo por gestoría</span><span class="val">4 casos</span></div>
+      <div class="compare-row"><span class="label">Dificultad plataforma</span><span class="val">14 casos (6%)</span></div>
+    </div>
+    <div class="compare-divider"></div>
+    <div class="compare-col pc">
+      <h3>PC · 148 proyectos</h3>
+      <div class="compare-row"><span class="label">Causa dominante Mem 1</span><span class="val">Baja (68%)</span></div>
+      <div class="compare-row"><span class="label">Causa dominante Mem 2</span><span class="val">Ghosting (79%)</span></div>
+      <div class="compare-row"><span class="label">Pipeline típico caída</span><span class="val">Penalización · Pdte Devolución</span></div>
+      <div class="compare-row"><span class="label">Insatisfacción cliente</span><span class="val">9 casos (6%)</span></div>
+      <div class="compare-row"><span class="label">Bloqueo por pago</span><span class="val">15 casos (10%)</span></div>
+      <div class="compare-row"><span class="label">Bloqueo por gestoría</span><span class="val">2 casos</span></div>
+      <div class="compare-row"><span class="label">Dificultad plataforma</span><span class="val">4 casos (3%)</span></div>
+    </div>
+  </div>
+
+</section>
+
+<!-- VI — Subproductos -->
+<section id="productos">
+  <div class="section-header">
+    <span class="section-num">VI</span>
+    <h2 id="productosTitle">Dentro de MKT — por subproducto</h2>
+    <span class="section-desc" id="productosDesc">WEB, SEO, RRSS, FACT y los demás</span>
+  </div>
+  <div class="chart-card">
+    <div class="chart-card-title">Distribución de causas por subproducto</div>
+    <div class="chart-card-sub">Solo familia MKT</div>
+    <div class="chart-wrap tall" id="chartProductos"></div>
+  </div>
+  <div class="insights-column insights-grid-2" id="subproductosInsights" style="margin-top: 1.2rem;"></div>
+</section>
+
+<!-- VII — Metodología -->
+<section id="metodo">
+  <div class="section-header">
+    <span class="section-num">VII</span>
+    <h2>Cómo se clasificó cada caso</h2>
+    <span class="section-desc">Taxonomía y árbol de decisión</span>
+  </div>
+  <div class="method">
+    <div class="method-col d">
+      <h3>Perdido · Desistido</h3>
+      <p>El cliente formalizó el desistimiento del acuerdo en Red.es, y queda reflejado en HubSpot.</p>
+      <div class="rule">Regla estricta: SOLO si <strong>Estado Acuerdo = "Desistido"</strong>. Cualquier otro estado descarta esta causa.</div>
+      <p style="margin-top: .8rem;">Subcausas típicas: Baja autónomo, Sin interés en proyecto, Mala reputación ORBIDI, Contactado sin respuesta.</p>
+    </div>
+    <div class="method-col b">
+      <h3>Perdido · Baja</h3>
+      <p>Baja efectiva (oficializada o no) o ruptura explícita de la relación sin desistimiento formal en Red.es. Es la causa "cajón grande".</p>
+      <div class="rule">Incluye: Fecha baja rellena · Estado Finalizado por renuncia / PDC · Cancelado ADA / BENEFICIARIO · insatisfacción con baja implícita.</div>
+      <p style="margin-top: .8rem;">Subcausas típicas: Sin gestión documentada, Pago de importe, Calidad de producto, Cierre de negocio.</p>
+    </div>
+    <div class="method-col g">
+      <h3>Perdido · Ghosting</h3>
+      <p>Hubo intento de contacto documentado por parte de ORBIDI y el cliente no respondió. El proyecto caducó por esa ausencia.</p>
+      <div class="rule">Clave: <strong>intento + ausencia</strong>. Si no hubo intento, no es ghosting (es "Sin gestión documentada" como subcausa de Baja).</div>
+      <p style="margin-top: .8rem;">Subcausas típicas: Contactado sin respuesta, Dificultad en plataforma, Retraso por Gestoría externa.</p>
+    </div>
+  </div>
+</section>
+
+<!-- VIII — Diccionario -->
+<section id="diccionario">
+  <div class="section-header">
+    <span class="section-num">VIII</span>
+    <h2>Qué significa cada subcausa</h2>
+    <span class="section-desc">Diccionario operativo · agrupado por categoría</span>
+  </div>
+  <div class="dict-grid">
+
+    <div class="dict-col cat-comunicacion">
+      <h3>Comunicación</h3>
+      <div class="dict-item">
+        <div class="dict-item-name">Contactado sin respuesta</div>
+        <div class="dict-item-desc">ORBIDI intentó contactar por llamada, email o WhatsApp, y el cliente no respondió. Hay evidencia del intento ("NC", "buzón", "correo enviado sin respuesta"). Es la subcausa más común de Ghosting.</div>
+        <span class="dict-item-note">152 casos · subcausa #1 del mes</span>
+      </div>
+      <div class="dict-item">
+        <div class="dict-item-name">Sin gestión documentada</div>
+        <div class="dict-item-desc">El proyecto caducó pero no hay trazabilidad en Comentario CS ni en Comentarios OPS (vacío o "Sin información"). Refleja un gap operativo interno, no una decisión del cliente.</div>
+        <span class="dict-item-note">73 casos · alerta de proceso</span>
+      </div>
+      <div class="dict-item">
+        <div class="dict-item-name">Sin motivo</div>
+        <div class="dict-item-desc">El cliente desistió o se dio de baja explícitamente, pero no dio razón identificable. Hay acción del cliente pero sin justificación de fondo.</div>
+        <span class="dict-item-note">30 casos</span>
+      </div>
+    </div>
+
+    <div class="dict-col cat-tecnico">
+      <h3>Técnico · Plataforma</h3>
+      <div class="dict-item">
+        <div class="dict-item-name">Dificultad en plataforma</div>
+        <div class="dict-item-desc">Problemas con Red.es, Cl@ve, certificado digital, portal de gestión. El cliente quería firmar pero la plataforma no lo permitió.</div>
+        <span class="dict-item-note">18 casos</span>
+      </div>
+      <div class="dict-item">
+        <div class="dict-item-name">Bloqueo técnico / Falta de credenciales</div>
+        <div class="dict-item-desc">ORBIDI no pudo avanzar por falta de accesos, credenciales, dominio no operativo o sitio del cliente caído.</div>
+        <span class="dict-item-note">5 casos</span>
+      </div>
+      <div class="dict-item">
+        <div class="dict-item-name">Retraso/Bloqueo por Gestoría externa</div>
+        <div class="dict-item-desc">El cliente quiere avanzar pero depende de su gestoría/asesor, que no facilita el certificado digital o no ejecuta el trámite.</div>
+        <span class="dict-item-note">6 casos</span>
+      </div>
+    </div>
+
+    <div class="dict-col cat-decision">
+      <h3>Decisión cliente</h3>
+      <div class="dict-item">
+        <div class="dict-item-name">Sin interés en proyecto</div>
+        <div class="dict-item-desc">El cliente no desea continuar y el comentario refleja desinterés real. También aplica si cuelga al escuchar "ORBIDI".</div>
+        <span class="dict-item-note mkt-only">27 casos · SOLO APLICA EN MKT</span>
+      </div>
+      <div class="dict-item">
+        <div class="dict-item-name">Baja autónomo</div>
+        <div class="dict-item-desc">El cliente indica explícitamente que se dio de baja como autónomo, como trabajador RETA, o que cerró su actividad profesional individual.</div>
+        <span class="dict-item-note">9 casos</span>
+      </div>
+      <div class="dict-item">
+        <div class="dict-item-name">Cierre de negocio</div>
+        <div class="dict-item-desc">El cliente cerró su empresa/actividad (cierre empresarial, no baja individual).</div>
+        <span class="dict-item-note">5 casos</span>
+      </div>
+      <div class="dict-item">
+        <div class="dict-item-name">Cliente falleció</div>
+        <div class="dict-item-desc">El comentario indica fallecimiento del cliente. Subcausa rara pero necesaria para no contaminar las otras categorías.</div>
+        <span class="dict-item-note">0 casos este mes</span>
+      </div>
+      <div class="dict-item">
+        <div class="dict-item-name">Bono renunciado</div>
+        <div class="dict-item-desc">El cliente renuncia voluntariamente al bono del Kit Digital sin dar motivo adicional.</div>
+        <span class="dict-item-note">0 casos este mes</span>
+      </div>
+      <div class="dict-item">
+        <div class="dict-item-name">Motivos personales</div>
+        <div class="dict-item-desc">No hay razón técnica u operativa clara, se infiere una razón personal del cliente.</div>
+        <span class="dict-item-note">1 caso</span>
+      </div>
+    </div>
+
+    <div class="dict-col cat-insatisfaccion">
+      <h3>Insatisfacción</h3>
+      <div class="dict-item">
+        <div class="dict-item-name">Calidad de producto</div>
+        <div class="dict-item-desc">Inconformidad directa con la calidad del entregable.</div>
+        <span class="dict-item-note">10 casos · concentrada en WEB</span>
+      </div>
+      <div class="dict-item">
+        <div class="dict-item-name">Descontento servicio</div>
+        <div class="dict-item-desc">Molestia con el servicio o proceso, no solo con el entregable.</div>
+        <span class="dict-item-note">9 casos</span>
+      </div>
+      <div class="dict-item">
+        <div class="dict-item-name">Atención recibida</div>
+        <div class="dict-item-desc">El problema de fondo es la atención, acompañamiento o experiencia con ORBIDI.</div>
+        <span class="dict-item-note">7 casos</span>
+      </div>
+      <div class="dict-item">
+        <div class="dict-item-name">Mala reputación ORBIDI</div>
+        <div class="dict-item-desc">El cliente no continúa por desconfianza, amenaza con denunciar, o reclama por incumplimientos graves.</div>
+        <span class="dict-item-note">13 casos · riesgo reputacional</span>
+      </div>
+      <div class="dict-item">
+        <div class="dict-item-name">No se cumplen expectativas</div>
+        <div class="dict-item-desc">El cliente expresa que el producto/servicio no cumple lo esperado.</div>
+        <span class="dict-item-note">2 casos</span>
+      </div>
+    </div>
+
+    <div class="dict-col cat-gestion">
+      <h3>Gestión del PC</h3>
+      <div class="dict-item">
+        <div class="dict-item-name">Gestión PC</div>
+        <div class="dict-item-desc">El motivo es propio del producto PC: rotura de stock, logística fallida, mal estado del equipo, equipo equivocado, retraso de entrega. <strong>Aplica mucho en MKT</strong> cuando el proyecto WEB/RRSS cae por culpa de la gestión PC asociada al mismo cliente.</div>
+        <span class="dict-item-note">8 casos</span>
+      </div>
+      <div class="dict-item">
+        <div class="dict-item-name">Incidencias documentación cliente</div>
+        <div class="dict-item-desc">Faltantes, inconsistencias o problemas con la documentación del cliente necesaria para el expediente.</div>
+        <span class="dict-item-note">0 casos este mes</span>
+      </div>
+    </div>
+
+    <div class="dict-col cat-pago">
+      <h3>Pago · Importe</h3>
+      <div class="dict-item">
+        <div class="dict-item-name">Pago de importe</div>
+        <div class="dict-item-desc">El cliente no ha realizado el pago del importe extra del ordenador. CS inicia la baja porque no habrá tiempo de entregar el PC en plazo.</div>
+        <span class="dict-item-note pc-only">10 casos · DOMINANTE EN PC</span>
+      </div>
+      <div class="dict-item">
+        <div class="dict-item-name">Error de importe</div>
+        <div class="dict-item-desc">Inconsistencia en el importe oficializado del acuerdo vs el PC elegido. Requiere rehacer el acuerdo o bloquea el avance.</div>
+        <span class="dict-item-note pc-only">3 casos</span>
+      </div>
+      <div class="dict-item">
+        <div class="dict-item-name">Pago IGIC</div>
+        <div class="dict-item-desc">Problema específico con el pago del IGIC (impuesto canario).</div>
+        <span class="dict-item-note pc-only">1 caso</span>
+      </div>
+      <div class="dict-item">
+        <div class="dict-item-name">No pago IVA</div>
+        <div class="dict-item-desc">El problema de fondo es el no pago del IVA o la confusión con IVA sujeto pasivo del importe del ordenador.</div>
+        <span class="dict-item-note">2 casos</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- IX — Tabla terminal -->
+<section id="tabla">
+  <div class="section-header">
+    <span class="section-num">IX</span>
+    <h2>Explorador de proyectos</h2>
+    <span class="section-desc">Filtra, busca, y abre el caso en HubSpot</span>
+  </div>
+  <div class="table-wrap">
+    <div class="table-bar">
+      <input type="text" class="table-search" id="searchInput" placeholder="buscar por nombre, ID, subcausa, comentario CS...">
+      <span class="table-counter" id="tableCounter">— proyectos</span>
+    </div>
+    <table id="tablaProyectos">
+      <thead>
+        <tr>
+          <th data-sort="id">ID</th>
+          <th data-sort="nombre">Proyecto</th>
+          <th data-sort="familia">Fam</th>
+          <th data-sort="producto">Prod</th>
+          <th data-sort="memoria">Mem</th>
+          <th data-sort="causa">Causa</th>
+          <th data-sort="subcausa">Subcausa</th>
+          <th data-sort="estado_acuerdo">Estado acuerdo</th>
+          <th data-sort="pipeline">Pipeline</th>
+        </tr>
+      </thead>
+      <tbody id="tablaBody"></tbody>
+    </table>
+    <div class="table-pagination">
+      <span id="paginationInfo">—</span>
+      <div>
+        <button class="page-btn" id="prevPage">← Anterior</button>
+        <button class="page-btn" id="nextPage">Siguiente →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <span><img src="assets/orbidi-logo.png" alt="ORBIDI" class="orbidi-footer-logo"><span class="footer-divider"></span><span class="footer-dot"></span>Cohorts Optimization · Operaciones</span>
+  <span id="footerInfo">389 proyectos analizados · MKT + PC</span>
+  <span>Corte: viernes 17 abril 2026</span>
+</footer>
+
+<script src="data.js?v=2"></script>
+<script src="app.js?v=6"></script>
+</body>
+</html>
